@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: openrental-vehicles
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:postgresql://${PGSQL_SERVICE_HOST}:${PGSQL_SERVICE_PORT}/OpenRental
+    username: postgres
+    password: ${postgres-password}
+    driverClassName: org.postgresql.Driver

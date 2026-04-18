@@ -1,0 +1,29 @@
+# Maven
+target/
+!mvnw
+!mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# IntelliJ
+out/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Optional local config
+application-local.properties
+application-local.yml
+
+# Build / coverage
+coverage/
+surefire-reports/
