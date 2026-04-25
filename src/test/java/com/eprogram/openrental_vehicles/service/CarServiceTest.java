@@ -1,6 +1,7 @@
 package com.eprogram.openrental_vehicles.service;
 
 import com.eprogram.openrental_vehicles.dto.CarDTO;
+import com.eprogram.openrental_vehicles.dto.CarRequestDTO;
 import com.eprogram.openrental_vehicles.exception.VehicleNotFoundException;
 import com.eprogram.openrental_vehicles.fixtures.IdUtils;
 import com.eprogram.openrental_vehicles.mapper.CarMapper;
@@ -15,11 +16,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.eprogram.openrental_vehicles.fixtures.CarFixtures.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -143,7 +146,21 @@ class CarServiceTest {
 
         assertThrows(VehicleNotFoundException.class, () -> carService.delete(IdUtils.getUUID(IdUtils.ID_STRING_A)));
         verify(carRepository).findById(IdUtils.getUUID(IdUtils.ID_STRING_A));
-        verify(carRepository, never()).delete(any());
+        verify(carRepository, never()).delete(any(Car.class));
+    }
+
+    @Test
+    void getFilteredCars_shouldReturnListOfCars_whenRequestProvided() {
+        CarRequestDTO requestDTO = new CarRequestDTO("Toyota", null, null, 4);
+        Car foundCar = getCar();
+        CarDTO outputDTO = getCarDTO();
+
+        when(carRepository.findAll(any(Specification.class))).thenReturn(List.of(foundCar));
+        when(carMapper.toDTO(foundCar)).thenReturn(outputDTO);
+
+        List<CarDTO> result = carService.getFilteredCars(requestDTO);
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst()).isEqualTo(outputDTO);
     }
 
 }

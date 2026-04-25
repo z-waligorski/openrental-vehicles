@@ -1,6 +1,7 @@
 package com.eprogram.openrental_vehicles.controller;
 
 import com.eprogram.openrental_vehicles.dto.CarDTO;
+import com.eprogram.openrental_vehicles.dto.CarRequestDTO;
 import com.eprogram.openrental_vehicles.exception.VehicleNotFoundException;
 import com.eprogram.openrental_vehicles.fixtures.IdUtils;
 import com.eprogram.openrental_vehicles.service.CarService;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.eprogram.openrental_vehicles.fixtures.CarFixtures.*;
+import static com.eprogram.openrental_vehicles.fixtures.IdUtils.ID_STRING_A;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -42,23 +44,23 @@ class CarControllerTest {
     void getCarById_shouldReturnCar_whenCarExists() throws Exception {
         CarDTO carDTO = getCarDTO();
 
-        when(carService.findById(IdUtils.getUUID(IdUtils.ID_STRING_A))).thenReturn(carDTO);
+        when(carService.findById(IdUtils.getUUID(ID_STRING_A))).thenReturn(carDTO);
 
-        mockMvc.perform(get("/cars/" + IdUtils.ID_STRING_A))
+        mockMvc.perform(get("/cars/" + ID_STRING_A))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(IdUtils.ID_STRING_A))
+                .andExpect(jsonPath("$.id").value(ID_STRING_A))
                 .andExpect(jsonPath("$.brand").value("Toyota"))
                 .andExpect(jsonPath("$.model").value("Corolla"));
     }
 
     @Test
     void getCarById_shouldReturnNotFound_whenCarDoesNotExist() throws Exception {
-        when(carService.findById(IdUtils.getUUID(IdUtils.ID_STRING_A)))
-                .thenThrow(new VehicleNotFoundException(IdUtils.getUUID(IdUtils.ID_STRING_A)));
+        when(carService.findById(IdUtils.getUUID(ID_STRING_A)))
+                .thenThrow(new VehicleNotFoundException(IdUtils.getUUID(ID_STRING_A)));
 
-        mockMvc.perform(get("/cars/" + IdUtils.ID_STRING_A))
+        mockMvc.perform(get("/cars/" + ID_STRING_A))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Vehicle with id " + IdUtils.ID_STRING_A + " not found"));
+                .andExpect(content().string("Vehicle with id " + ID_STRING_A + " not found"));
     }
 
     @Test
@@ -73,7 +75,7 @@ class CarControllerTest {
                         .param("page", "0")
                         .param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(IdUtils.ID_STRING_A))
+                .andExpect(jsonPath("$.content[0].id").value(ID_STRING_A))
                 .andExpect(jsonPath("$.content[0].brand").value("Toyota"))
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.size").value(10));
@@ -89,8 +91,8 @@ class CarControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(carDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/cars/" + IdUtils.ID_STRING_A))
-                .andExpect(jsonPath("$.id").value(IdUtils.ID_STRING_A))
+                .andExpect(header().string("Location", "/cars/" + ID_STRING_A))
+                .andExpect(jsonPath("$.id").value(ID_STRING_A))
                 .andExpect(jsonPath("$.brand").value("Toyota"))
                 .andExpect(jsonPath("$.model").value("Corolla"));
     }
@@ -118,11 +120,11 @@ class CarControllerTest {
 
         when(carService.update(any(CarDTO.class), any(UUID.class))).thenReturn(responseCarDTO);
 
-        mockMvc.perform(put("/cars/" + IdUtils.ID_STRING_A)
+        mockMvc.perform(put("/cars/" + ID_STRING_A)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestCarDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(IdUtils.ID_STRING_A))
+                .andExpect(jsonPath("$.id").value(ID_STRING_A))
                 .andExpect(jsonPath("$.brand").value("Honda"));
     }
 
@@ -131,28 +133,62 @@ class CarControllerTest {
         CarDTO requestCarDTO = getCarDTO();
 
         when(carService.update(any(CarDTO.class), any(UUID.class)))
-                .thenThrow(new VehicleNotFoundException(IdUtils.getUUID(IdUtils.ID_STRING_A)));
+                .thenThrow(new VehicleNotFoundException(IdUtils.getUUID(ID_STRING_A)));
 
-        mockMvc.perform(put("/cars/" + IdUtils.ID_STRING_A)
+        mockMvc.perform(put("/cars/" + ID_STRING_A)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestCarDTO)))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Vehicle with id " + IdUtils.ID_STRING_A + " not found"));
+                .andExpect(content().string("Vehicle with id " + ID_STRING_A + " not found"));
     }
 
     @Test
     void deleteCar_shouldDeleteCar_whenCarExists() throws Exception {
-        mockMvc.perform(delete("/cars/" + IdUtils.ID_STRING_A))
+        mockMvc.perform(delete("/cars/" + ID_STRING_A))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     void deleteCar_shouldThrowException_whenCarDoesNotExist() throws Exception {
-        doThrow(new VehicleNotFoundException(IdUtils.getUUID(IdUtils.ID_STRING_A)))
-                .when(carService).delete(IdUtils.getUUID(IdUtils.ID_STRING_A));
+        doThrow(new VehicleNotFoundException(IdUtils.getUUID(ID_STRING_A)))
+                .when(carService).delete(IdUtils.getUUID(ID_STRING_A));
 
-        mockMvc.perform(delete("/cars/" + IdUtils.ID_STRING_A))
+        mockMvc.perform(delete("/cars/" + ID_STRING_A))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Vehicle with id " + IdUtils.ID_STRING_A + " not found"));
+                .andExpect(content().string("Vehicle with id " + ID_STRING_A + " not found"));
+    }
+
+    @Test
+    void getFilteredCars_shouldReturnListOfCars_whenFiltersProvided() throws Exception {
+        CarRequestDTO inputDTO = new CarRequestDTO("Toyota", null, 2020, null);
+
+        when(carService.getFilteredCars(inputDTO)).thenReturn(List.of(getCarDTO()));
+
+        mockMvc.perform(get("/cars/filter")
+                        .param("brand", "Toyota")
+                        .param("minYearOfProduction", "2020"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(ID_STRING_A))
+                .andExpect(jsonPath("$[0].brand").value("Toyota"))
+                .andExpect(jsonPath("$[0].model").value("Corolla"))
+                .andExpect(jsonPath("$[0].yearOfProduction").value(2020))
+                .andExpect(jsonPath("$[0].seats").value(4))
+                .andExpect(jsonPath("$[0].fuelConsumption").value(10.0));
+    }
+
+    @Test
+    void getFilteredCars_shouldReturnListOfCars_whenNoFiltersProvided() throws Exception {
+        CarRequestDTO inputDTO = new CarRequestDTO(null, null, null, null);
+
+        when(carService.getFilteredCars(inputDTO)).thenReturn(List.of(getCarDTO()));
+
+        mockMvc.perform(get("/cars/filter"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(ID_STRING_A))
+                .andExpect(jsonPath("$[0].brand").value("Toyota"))
+                .andExpect(jsonPath("$[0].model").value("Corolla"))
+                .andExpect(jsonPath("$[0].yearOfProduction").value(2020))
+                .andExpect(jsonPath("$[0].seats").value(4))
+                .andExpect(jsonPath("$[0].fuelConsumption").value(10.0));
     }
 }

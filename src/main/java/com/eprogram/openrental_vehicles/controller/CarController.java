@@ -1,6 +1,7 @@
 package com.eprogram.openrental_vehicles.controller;
 
 import com.eprogram.openrental_vehicles.dto.CarDTO;
+import com.eprogram.openrental_vehicles.dto.CarRequestDTO;
 import com.eprogram.openrental_vehicles.service.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class CarController {
 
     @PostMapping
     public ResponseEntity<CarDTO> createCar(@Valid @RequestBody CarDTO car) {
-        CarDTO savedCarDTO = carService.save(car);
+        var savedCarDTO = carService.save(car);
         return ResponseEntity.created(URI.create("/cars/" + savedCarDTO.id()))
                 .body(savedCarDTO);
     }
@@ -45,5 +47,11 @@ public class CarController {
     public ResponseEntity<Void> deleteCar(@PathVariable UUID id) {
         carService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<CarDTO>> getFilteredCars(@ModelAttribute CarRequestDTO carRequestDTO) {
+        var result = carService.getFilteredCars(carRequestDTO);
+        return ResponseEntity.ok(result);
     }
 }
