@@ -1,6 +1,7 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/OpenRental_3
+    url: jdbc:postgresql://localhost:5432/openrental_vehicles
+    username: postgres
   jpa:
     show-sql: true
     properties:
