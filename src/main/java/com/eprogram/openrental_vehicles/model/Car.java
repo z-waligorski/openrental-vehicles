@@ -3,13 +3,14 @@ package com.eprogram.openrental_vehicles.model;
 import com.eprogram.openrental_vehicles.dto.CarDTO;
 import com.eprogram.openrental_vehicles.model.util.Updatable;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.Hibernate;
 
 import java.util.UUID;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
 @Table(name = "cars")
 public class Car extends Vehicle implements Updatable<Car, CarDTO> {
@@ -26,5 +27,22 @@ public class Car extends Vehicle implements Updatable<Car, CarDTO> {
         this.setSeats(carDTO.seats());
         this.setFuelConsumption(carDTO.fuelConsumption());
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (getClass() != o.getClass())
+            return false;
+        Car other = (Car) o;
+        return id != null && id.equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Hibernate.getClass(this).hashCode();
     }
 }
