@@ -179,6 +179,10 @@ The generated JAR file will be located in:
 target/
 ```
 
+## Planned Improvements
+- Authentication & Authorization
+- Further features for motorcycles
+- Code improvements, refactoring, and optimization
 
 ## License
 
