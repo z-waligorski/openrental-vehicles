@@ -1,5 +1,18 @@
-FROM eclipse-temurin:21
+# ===== BUILD STAGE =====
+FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
-COPY target/*.jar app.jar
+COPY . .
+RUN chmod +x mvnw
+RUN ./mvnw clean package -DskipTests
+
+# ===== RUNTIME STAGE =====
+FROM eclipse-temurin:21-jre
+
+RUN addgroup --system spring \
+    && adduser --system spring --ingroup spring
+USER spring:spring
+
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

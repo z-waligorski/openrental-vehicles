@@ -2,16 +2,24 @@ services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_DB: OpenRental_2
+      POSTGRES_DB: openrental_vehicles
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5435:5432"
+    volumes:
+      - vehicles-postgres-data:/var/lib/postgresql/data
   openrental:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: openrental-vehicles:1.0
     depends_on:
       - postgres
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "8080:8080"
+volumes:
+  vehicles-postgres-data:

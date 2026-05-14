@@ -82,22 +82,13 @@ Available Spring profiles:
 
 ## Running with Docker
 
-### 1. Build the application
+### Start services
+Make sure that environmental variable is set for POSTGRES_PASSWORD.
+
+Start the application:
 
 ```bash
-./mvnw clean package
-```
-
-### 2. Build the Docker image
-
-```bash
-docker build -t openrental-vehicles:1.0 .
-```
-
-### 3. Start services
-
-```bash
-docker compose up
+docker compose up --build
 ```
 
 The application will be available at:
