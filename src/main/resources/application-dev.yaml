@@ -11,3 +11,6 @@ debug: true
 logging:
   level:
     org.flywaydb: DEBUG
+    org:
+      springframework:
+        security: DEBUG

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -15,12 +16,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('role_admin')")
 @RestController
 @RequestMapping("/cars")
 public class CarController {
 
     private final CarService carService;
 
+    @PreAuthorize("hasAnyRole('role_admin', 'role_user')")
     @GetMapping("/{id}")
     public ResponseEntity<CarDTO> getCarById(@PathVariable UUID id) {
         return ResponseEntity.ok(carService.findById(id));
@@ -49,6 +52,7 @@ public class CarController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('role_admin', 'role_user')")
     @GetMapping("/filter")
     public ResponseEntity<List<CarDTO>> getFilteredCars(@ModelAttribute CarRequestDTO carRequestDTO) {
         var result = carService.getFilteredCars(carRequestDTO);

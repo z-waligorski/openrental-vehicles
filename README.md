@@ -15,6 +15,8 @@ The project is built as a practice application for Spring Boot and related backe
 - PostgreSQL database integration
 - Flyway database migrations
 - Bean validation
+- Keycloak-based authentication and authorization
+- Role-based access control
 - Docker support
 - Lombok-based boilerplate reduction
 
@@ -24,9 +26,12 @@ The project is built as a practice application for Spring Boot and related backe
 - Spring Boot
 - Spring MVC
 - Spring Data JPA
+- Spring Security
+- OAuth2 Resource Server
 - Jakarta Validation
 - PostgreSQL
 - Flyway
+- Keycloak
 - Lombok
 - Maven
 - Docker
@@ -39,6 +44,7 @@ Before running the project, make sure you have installed:
 - Maven 3.9+ or use the included Maven Wrapper
 - Docker and Docker Compose 
 - PostgreSQL, if running without Docker 
+- Keycloak, if running authentication services outside Docker
 - Alternatively, the project can be deployed with Kubernetes
 
 ## Project Structure
@@ -72,6 +78,14 @@ SPRING_DATASOURCE_USERNAME
 SPRING_DATASOURCE_PASSWORD
 ```
 
+The application also uses Keycloak for authentication and authorization.  
+Configure the OAuth2 issuer URI for the Keycloak realm:
+
+```text
+KEYCLOAK_ISSUER_URI
+KEYCLOAK_JWKS_URI
+```
+
 Available Spring profiles:
 
 | Profile | Description |
@@ -79,11 +93,34 @@ Available Spring profiles:
 | `dev` | Local development configuration |
 | `docker` | Docker Compose configuration |
 
+## Security
+
+The service is protected with Spring Security and Keycloak.
+
+Clients must authenticate with Keycloak and send a valid JWT access token when calling protected endpoints.
+
+Example request:
+```bash
+bash curl -H "Authorization: Bearer <access-token>"
+http://localhost:8080/cars
+```
+
+
+Access to endpoints is controlled using roles configured in Keycloak.
+
+Typical roles:
+
+| Role | Description |
+|---|---|
+| `admin` | Full access to protected vehicle management operations |
+| `user` | Limited access to read-only or user-level operations |
+
+The exact permissions depend on the security configuration in the application.
 
 ## Running with Docker
 
 ### Start services
-Make sure that environmental variable is set for POSTGRES_PASSWORD.
+Make sure that environmental variable is set for POSTGRES_PASSWORD and Keycloak-related values.
 
 Start the application:
 
@@ -102,9 +139,19 @@ PostgreSQL is exposed on the host at:
 ```text
 localhost:5435
 ```
+
+Keycloak must be running separately and reachable from the application using the configured issuer URI.
+
 Deployment is possible also with kubernetes, as described in the openrental-infra project.
 
 ## API Endpoints
+
+API endpoints require authentication using a valid Keycloak JWT access token.
+
+Include the token in the `Authorization` header:
+```text
+Authorization: Bearer <access-token>
+```
 
 ### Cars
 
@@ -141,7 +188,8 @@ List endpoints support Spring Data pagination parameters:
 Example:
 
 ```bash
-curl "http://localhost:8080/cars?page=0&size=10"
+curl -H "Authorization: Bearer <access-token>
+"http://localhost:8080/cars?page=0&size=10"
 ```
 
 
@@ -171,8 +219,8 @@ target/
 ```
 
 ## Planned Improvements
-- Authentication & Authorization
 - Further features for motorcycles
+- Integration tests for secured endpoints
 - Code improvements, refactoring, and optimization
 
 ## License

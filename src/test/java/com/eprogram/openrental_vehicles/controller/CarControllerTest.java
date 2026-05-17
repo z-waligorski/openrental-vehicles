@@ -1,5 +1,6 @@
 package com.eprogram.openrental_vehicles.controller;
 
+import com.eprogram.openrental_vehicles.config.SecurityConfig;
 import com.eprogram.openrental_vehicles.dto.CarDTO;
 import com.eprogram.openrental_vehicles.dto.CarRequestDTO;
 import com.eprogram.openrental_vehicles.exception.VehicleNotFoundException;
@@ -8,11 +9,13 @@ import com.eprogram.openrental_vehicles.service.CarService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -29,6 +32,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WithMockUser(roles = "role_admin")
+@Import(SecurityConfig.class)
 @WebMvcTest(CarController.class)
 class CarControllerTest {
     @Autowired

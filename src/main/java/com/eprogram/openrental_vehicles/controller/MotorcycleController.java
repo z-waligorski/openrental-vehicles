@@ -7,18 +7,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.UUID;
 
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('role_admin')")
 @RestController
 @RequestMapping("/motorcycles")
 public class MotorcycleController {
 
     private final MotorcycleService motorcycleService;
 
+    @PreAuthorize("hasAnyRole('role_admin', 'role_user')")
     @GetMapping("/{id}")
     public ResponseEntity<MotorcycleDTO> getMotorcycleById(@PathVariable UUID id) {
         return ResponseEntity.ok(motorcycleService.findById(id));
